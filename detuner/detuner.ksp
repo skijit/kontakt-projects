@@ -9,12 +9,17 @@ on init
     declare %incoming_note[128]
     declare %detune_amt[128]
 
+    declare polyphonic $curNote
+
     declare $triggeredNote
     declare $mappedNote
     declare $mappedFreq
     declare $targetFreq
 
-    declare logResult
+    declare $logTerm1
+    declare $logTerm2
+    declare $logTerm3
+    declare $logTerm4
 
     declare ui_button $calcButton
     set_text ($calcButton, "Calc Detune")
@@ -215,30 +220,96 @@ on init
     move_control($mapped_note_pitch_15, 3, 16)
     move_control($target_note_pitch_15, 4, 16)
 
-    { TODO make_persistent all the tunings which don't change }
+    make_persistent($triggered_note_box_1)
+    make_persistent($mapped_note_box_1)
+    make_persistent($mapped_note_pitch_1)
+    make_persistent($target_note_pitch_1)
+    make_persistent($triggered_note_box_2)
+    make_persistent($mapped_note_box_2)
+    make_persistent($mapped_note_pitch_2)
+    make_persistent($target_note_pitch_2)
+    make_persistent($triggered_note_box_3)
+    make_persistent($mapped_note_box_3)
+    make_persistent($mapped_note_pitch_3)
+    make_persistent($target_note_pitch_3)
+    make_persistent($triggered_note_box_4)
+    make_persistent($mapped_note_box_4)
+    make_persistent($mapped_note_pitch_4)
+    make_persistent($target_note_pitch_4)
+    make_persistent($triggered_note_box_5)
+    make_persistent($mapped_note_box_5)
+    make_persistent($mapped_note_pitch_5)
+    make_persistent($target_note_pitch_5)
+    make_persistent($triggered_note_box_6)
+    make_persistent($mapped_note_box_6)
+    make_persistent($mapped_note_pitch_6)
+    make_persistent($target_note_pitch_6)
+    make_persistent($triggered_note_box_7)
+    make_persistent($mapped_note_box_7)
+    make_persistent($mapped_note_pitch_7)
+    make_persistent($target_note_pitch_7)
+    make_persistent($triggered_note_box_8)
+    make_persistent($mapped_note_box_8)
+    make_persistent($mapped_note_pitch_8)
+    make_persistent($target_note_pitch_8)
+    make_persistent($triggered_note_box_9)
+    make_persistent($mapped_note_box_9)
+    make_persistent($mapped_note_pitch_9)
+    make_persistent($target_note_pitch_9)
+    make_persistent($triggered_note_box_10)
+    make_persistent($mapped_note_box_10)
+    make_persistent($mapped_note_pitch_10)
+    make_persistent($target_note_pitch_10)
+    make_persistent($triggered_note_box_11)
+    make_persistent($mapped_note_box_11)
+    make_persistent($mapped_note_pitch_11)
+    make_persistent($target_note_pitch_11)
+    make_persistent($triggered_note_box_12)
+    make_persistent($mapped_note_box_12)
+    make_persistent($mapped_note_pitch_12)
+    make_persistent($target_note_pitch_12)
+    make_persistent($triggered_note_box_13)
+    make_persistent($mapped_note_box_13)
+    make_persistent($mapped_note_pitch_13)
+    make_persistent($target_note_pitch_13)
+    make_persistent($triggered_note_box_14)
+    make_persistent($mapped_note_box_14)
+    make_persistent($mapped_note_pitch_14)
+    make_persistent($target_note_pitch_14)
+    make_persistent($triggered_note_box_15)
+    make_persistent($mapped_note_box_15)
+    make_persistent($mapped_note_pitch_15)
+    make_persistent($target_note_pitch_15)
 
 
 end on  
 
 function calculateDetune
-    { %incoming_note[128]
-      %detune_amt[128] 
-      $triggeredNote
-      $mappedNote
-      $mappedFreq
-      $targetFreq 
-      output: %detune_amt[$mappedNote]}
+    
 
-    {TODO}
-    logResult := Log2(10)
+    $logTerm1 := Log2($targetFreq) { target_F0 }
+    $logTerm2 := Log2($mappedFreq) { sample_F0 }
+    $logTerm3 := $logTerm1 - $logTerm2
+    $logTerm4 := ($logTerm3 * 12) / 10
+    { message(logTerm1 & ", " & logTerm2 & ", " & logTerm3 & ", " & logTerm4) }
+
+    %incoming_note[$triggeredNote] := $mappedNote
+    %detune_amt[$mappedNote] := $logTerm4 
+
+    message("trig: " & $triggeredNote & ", mapped: " & $mappedNote & ", inc_note: " & %incoming_note[$triggeredNote] & "detune: " & %detune_amt[$mappedNote])
     
 
 end function 
 
 on note
-    if (%incoming_note[$EVENT_NOTE] > 0)
-        change_note($EVENT_ID, %incoming_note[$EVENT_NOTE])
-        change_tune($EVENT_ID, %detune_amt[%incoming_note[$EVENT_NOTE]],0)  { 3rd parm = 0 => absolute, rather than relative shift }
+    $curNote := $EVENT_NOTE
+
+    message("incoming note: " & $curNote & ", array val is: " & %incoming_note[$curNote])
+
+    if (%incoming_note[$curNote] > 0)
+        change_note($EVENT_ID, %incoming_note[$curNote])
+        change_tune($EVENT_ID, %detune_amt[%incoming_note[$curNote]],0)  { 3rd parm = 0 => absolute, rather than relative shift }
+        message("triggered: " & $curNote & ", mapped: " & %incoming_note[$curNote] & ", detune amt: " & %detune_amt[%incoming_note[$curNote]])
     else
         ignore_event($EVENT_ID)
     end if
@@ -247,9 +318,9 @@ end on
 on release
     { Note: change_tune is not allowed in release callback... wonder if this might be a problem }
 
-    if (%incoming_note[$EVENT_NOTE] = 0)
+    { if (%incoming_note[$EVENT_NOTE] = 0)
         ignore_event($EVENT_ID)    
-    end if    
+    end if  }  
 end on 
 
 on ui_control ($calcButton)
